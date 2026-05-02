@@ -87,7 +87,7 @@ function ensureStyle() {
 }
 
 function buildButton() {
-  const btn = document.createElement('div');
+  const btn = document.createElement('span');
   btn.id = BTN_ID;
   btn.setAttribute('role', 'button');
   btn.tabIndex = 0;
@@ -107,25 +107,47 @@ function buildButton() {
   return btn;
 }
 
-function findBreadcrumbArea() {
+function getCurrentTitle() {
+  return (document.title || '')
+    .trim()
+    .replace(/\s*[-|–—]\s*Notion\s*$/i, '')
+    .trim();
+}
+
+function findInsertionPoint() {
   const topbar = document.querySelector('.notion-topbar');
   if (!topbar) return null;
-  const explicit = topbar.querySelector('.notion-topbar-breadcrumb');
-  if (explicit) return explicit;
-  // Notion's topbar uses two absolutely-positioned groups: the breadcrumb is the
-  // first child (anchored to the left), the action group is the last child
-  // (anchored to the right). Use the first child to sit right next to the
-  // breadcrumb trail.
-  return topbar.firstElementChild;
+
+  // Preferred: a container whose class explicitly mentions "breadcrumb".
+  const breadcrumb = topbar.querySelector('[class*="breadcrumb" i]');
+  if (breadcrumb) return { mode: 'append', node: breadcrumb };
+
+  // Fallback: locate the last breadcrumb segment by matching its text against the
+  // document title, then insert as its next sibling so the button shares the same
+  // parent (and therefore the same flex/inline layout) as the breadcrumb segments.
+  const title = getCurrentTitle();
+  if (title) {
+    const candidates = topbar.querySelectorAll('*');
+    for (const el of candidates) {
+      if (el.children.length === 0 && el.textContent.trim() === title) {
+        return { mode: 'after', node: el };
+      }
+    }
+  }
+  return null;
 }
 
 function ensureButton() {
   if (document.getElementById(BTN_ID)) return;
-  const breadcrumb = findBreadcrumbArea();
-  if (!breadcrumb) return;
+  const target = findInsertionPoint();
+  if (!target) return;
   ensureStyle();
-  // Append so the button sits to the right of the last breadcrumb segment.
-  breadcrumb.appendChild(buildButton());
+  const btn = buildButton();
+  if (target.mode === 'append') {
+    target.node.appendChild(btn);
+  } else {
+    target.node.insertAdjacentElement('afterend', btn);
+  }
 }
 
 let scheduled = false;
