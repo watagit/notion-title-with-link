@@ -14,8 +14,11 @@ chrome.action.onClicked.addListener(async (tab) => {
 function copyTitleWithLink() {
   const url = window.location.href;
 
-  const ogTitle = document.querySelector('meta[property="og:title"]')?.content;
-  const rawTitle = (ogTitle || document.title || '').trim();
+  // document.title is updated by Notion's SPA to the current page name.
+  // og:title is the static marketing title ("Notion | Where teams ..."), so only use it as a last resort.
+  const docTitle = (document.title || '').trim();
+  const ogTitle = (document.querySelector('meta[property="og:title"]')?.content || '').trim();
+  const rawTitle = docTitle || ogTitle;
   const title = rawTitle.replace(/\s*[-|–—]\s*Notion\s*$/i, '').trim() || url;
 
   const escapeHtml = (s) =>
