@@ -107,27 +107,25 @@ function buildButton() {
   return btn;
 }
 
-function findActionArea() {
+function findBreadcrumbArea() {
   const topbar = document.querySelector('.notion-topbar');
   if (!topbar) return null;
-  const explicit = topbar.querySelector('.notion-topbar-action-buttons');
+  const explicit = topbar.querySelector('.notion-topbar-breadcrumb');
   if (explicit) return explicit;
-  // Fallback: Notion's topbar typically has the breadcrumb as the first child and the
-  // right-side action group (Share, comments, etc.) as the last child, positioned
-  // absolutely against the right edge. Use that group so we never overlap the breadcrumb.
-  const children = topbar.children;
-  if (children.length >= 2) return children[children.length - 1];
-  return null;
+  // Notion's topbar uses two absolutely-positioned groups: the breadcrumb is the
+  // first child (anchored to the left), the action group is the last child
+  // (anchored to the right). Use the first child to sit right next to the
+  // breadcrumb trail.
+  return topbar.firstElementChild;
 }
 
 function ensureButton() {
   if (document.getElementById(BTN_ID)) return;
-  const actionArea = findActionArea();
-  if (!actionArea) return;
+  const breadcrumb = findBreadcrumbArea();
+  if (!breadcrumb) return;
   ensureStyle();
-  // Prepend so the button sits to the left of Share/comments/etc. but stays
-  // inside the right-side group.
-  actionArea.prepend(buildButton());
+  // Append so the button sits to the right of the last breadcrumb segment.
+  breadcrumb.appendChild(buildButton());
 }
 
 let scheduled = false;
