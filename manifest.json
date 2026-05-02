@@ -2,16 +2,22 @@
   "manifest_version": 3,
   "name": "Notion Title with Link",
   "description": "Copy the current Notion page title as a hyperlink so it can be pasted into Slack as a clickable link.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "action": {
     "default_title": "Copy Notion title with link"
   },
-  "permissions": ["activeTab", "scripting"],
-  "host_permissions": [
-    "https://www.notion.so/*",
-    "https://*.notion.site/*"
-  ],
+  "permissions": ["activeTab"],
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.notion.so/*",
+        "https://*.notion.site/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }
