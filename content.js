@@ -109,11 +109,13 @@ function buildButton() {
 
 function ensureButton() {
   if (document.getElementById(BTN_ID)) return;
-  const topbar = document.querySelector('.notion-topbar');
-  if (!topbar) return;
+  // Only inject into the dedicated action-buttons container on the right side of the
+  // topbar. Falling back to the topbar root would overlap the breadcrumb on layouts
+  // that position children absolutely.
+  const actionArea = document.querySelector('.notion-topbar .notion-topbar-action-buttons');
+  if (!actionArea) return;
   ensureStyle();
-  const actionArea = topbar.querySelector('.notion-topbar-action-buttons') || topbar;
-  actionArea.prepend(buildButton());
+  actionArea.appendChild(buildButton());
 }
 
 let scheduled = false;
